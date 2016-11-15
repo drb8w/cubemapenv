@@ -30,22 +30,21 @@
 
 //#include "StringHelpers.hpp"
 #include "CubemapFramebuffer.h"
+#include "FrameBufferObjectView.h"
+#include "TextureView.h"
 
 class cubemapenv_app : public sb7::application
 {
 private:
-	GLuint fbo;
-	GLuint color_texture;
-	GLuint depth_texture;
-
-	GLuint texunit_cubemap = 2;
-	GLuint sampler;
 
 	GLsizei width = 512;
 	GLsizei height = 512;
 
 	// -----------------------------------------
 	TotalGlobal::CubemapFramebuffer *m_pCubemapFrameBuffer;
+
+	TextureView *pTexView;
+	FrameBufferObjectView *pFBOView;
 
 public:
     cubemapenv_app()
@@ -68,67 +67,9 @@ protected:
 	{
 		m_pCubemapFrameBuffer = new TotalGlobal::CubemapFramebuffer(cubemap_render_prog, m_Objects, width, height);
 
-		return;
-
-		// ===================================================================================
-
-		// OpenGL 4.5
-		//glCreateFramebuffers(1, &fbo);
-		glGenFramebuffers(1, &fbo);
-		// TODO: reuse this framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo); // bind generated framebuffer for writing, i.e. rendering
-
-		// cretate a texture for our color buffer
-		//color_texture;
-		// version 1.0 - single texture unit
-		//glGenTextures(1, &color_texture);
-		//glBindTexture(GL_TEXTURE_2D, color_texture);
-		
-		// version 2.0 - multiple texture units
-		glGenTextures(1, &color_texture);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, color_texture);
-		// OpenGL 4.5
-		//glCreateTextures(1, GL_TEXTURE_2D, &color_texture);
-		//glBindTextureUnit(texunit_cubemap, color_texture);
-
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
-
-		// no mipmaps so turn them off for the texture
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		// create a texture for our depth buffer
-		//depth_texture;
-		// version 1.0 - single texture unit
-		//glGenTextures(1, &depth_texture);
-		//glBindTexture(GL_TEXTURE_2D, depth_texture);
-
-		// version 2.0 - multiple texture units
-		glGenTextures(1, &depth_texture);
-		glActiveTexture(GL_TEXTURE2);  // is this valid to bind it to the same texture unit? Does this unbind color_texture?
-		glBindTexture(GL_TEXTURE_2D, depth_texture);
-		// OpenGL 4.5
-		//glCreateTextures(1, GL_TEXTURE_2D, &depth_texture);
-		//glBindTextureUnit(texunit_cubemap, depth_texture);
-
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, width, height);
-
-		// attach color and depth texture to the framebuffer
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, color_texture, 0);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_texture, 0);
-
-		// ----------------------------------------------------------
-
-		// map to other program !!!!
-		//glUseProgram(render_prog); // necessary ???
-		//glGenSamplers(1, &sampler);
-		//glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		//GLint texUnit = GL_TEXTURE2 - GL_TEXTURE0;
-		//GLuint samplerUniform = glGetUniformLocation(render_prog, "texSampler_test");
-		//glUniform1i(samplerUniform, texUnit);
-		//glUseProgram(0); // necessary ???
-
+		pFBOView = new FrameBufferObjectView(width, height, "CubemapFramebuffer", Channels::RGB, 
+			m_pCubemapFrameBuffer->GetFramebufferIndex(), m_pCubemapFrameBuffer->GetTextureUnitIndex(), m_pCubemapFrameBuffer->GetCubeMapColorTextureIndex(), 
+			GL_TEXTURE_CUBE_MAP);
 	}
 
 	void RenderCubeMapExt()
@@ -138,52 +79,21 @@ protected:
 		tex_envmap = m_pCubemapFrameBuffer->GetCubeMapColorTextureIndex();
 		texunit_envmap = m_pCubemapFrameBuffer->GetTextureUnitIndex();
 
-		//// TODO: setup binding correctly... / bind later
-		//glActiveTexture(GL_TEXTURE0 + texunit_envmap);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, tex_envmap);
+		// TODO: setup binding correctly... / bind later?
+		glActiveTexture(GL_TEXTURE0 + texunit_envmap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, tex_envmap);
 
 		////glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-		return;
 
-		// =========================================================================================
+		pTexView->ShowBufferView(showBufferView);
+		pFBOView->ShowBufferView(showBufferView);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo); // bind generated framebuffer for writing, i.e. rendering
-
-		static const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0 };
-		glDrawBuffers(1, draw_buffers);
-
-		// -------------------------------------------------------------------------------------------
-		// set the camera position and orientation
-		// -> set the model-view matrix in the shader
-
-		// view in negative z-direction
-		// ----------------------------
-		vmath::mat4 proj_matrix = vmath::perspective(60.0f, (float)width / (float)height, 0.1f, 1000.0f);
-		vmath::mat4 view_matrix = vmath::lookat(vmath::vec3(0.0f, 0.0f, 0.0f), vmath::vec3(0.0f, 0.0f, -1.0f), vmath::vec3(0.0f, 1.0f, 0.0f));
-		vmath::mat4 mv_matrix = view_matrix *
-			vmath::rotate(0.0f, 1.0f, 0.0f, 0.0f) *
-			vmath::rotate(0.0f, 0.0f, 1.0f, 0.0f) *
-			vmath::translate(0.0f, -4.0f, 0.0f);
-
-		static const GLfloat gray[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-		static const GLfloat ones[] = { 1.0f };
-		glClearBufferfv(GL_COLOR, fbo, gray);
-		glClearBufferfv(GL_DEPTH, fbo, ones);
-		glViewport(0, 0, width, height);
-
-		glUseProgram(cubemap_render_prog);
-
-		glUniformMatrix4fv(uniforms.cubemap_render.mv_matrix, 1, GL_FALSE, mv_matrix);
-		glUniformMatrix4fv(uniforms.cubemap_render.proj_matrix, 1, GL_FALSE, proj_matrix);
-
-		glEnable(GL_DEPTH_TEST);
-
-		object.render();
-
-		// -------------------------------------------------------------------------------------------
-		glBindTexture(GL_TEXTURE_2D, 0); // unbind the texture
-		glBindFramebuffer(GL_FRAMEBUFFER, 0); // set rendering back to default framebuffer
+		if (updateBufferView)
+		{
+			pTexView->UpdateBufferView();
+			pFBOView->UpdateBufferView();
+		}
 
 	}
 
@@ -197,19 +107,26 @@ protected:
 		// ---------------------------------------------
 
 		// TEST
-		//envmaps[0] = sb7::ktx::file::load("media/textures/envmaps/mountaincube.ktx");
-		////envmaps[0] = sb7::ktx::file::load("C:/Superbible_7/sb7code - master/bin/media/textures/envmaps/mountaincube.ktx");
-		//tex_envmap = envmaps[envmap_index];
+		envmaps[0] = sb7::ktx::file::load("media/textures/envmaps/mountaincube.ktx");
+		//envmaps[0] = sb7::ktx::file::load("C:/Superbible_7/sb7code - master/bin/media/textures/envmaps/mountaincube.ktx");
+		tex_envmap = envmaps[envmap_index];
 
-  //      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  //      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
+		// https://www.opengl.org/discussion_boards/showthread.php/181374-finding-out-the-active-texture-from-the-texture-unit
+		GLint whichID;
+		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &whichID);
+		pTexView = new TextureView(width, height, "mountaincube", Channels::RGB, whichID, tex_envmap, GL_TEXTURE_CUBE_MAP);
+
         object.load("media/objects/dragon.sbm");
 		//object.load("C:/Superbible_7/sb7code - master/bin/media/objects/dragon.sbm");
-	
 		m_Objects.push_back(&object);
+
+		//object2.load("media/objects/ladybug.sbm");
+		//m_Objects.push_back(&object2);
 
         load_shaders();
 
@@ -226,12 +143,7 @@ protected:
     virtual void render(double currentTime)
     {
 		// ----------------------------------------------------------------------------------------------
-		// 1.st render pass: render the content of the cubemap without the object that use the cubemap
-		// ----------------------------------------------------------------------------------------------
-		RenderCubeMapExt();
-
-		// ----------------------------------------------------------------------------------------------
-		// 2.nd render pass: render the cubemap itself into the skybox
+		// 1.st render pass: render the cubemap itself into the skybox
 		// ----------------------------------------------------------------------------------------------
 
 		static const GLfloat gray[] = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -250,11 +162,7 @@ protected:
         glClearBufferfv(GL_COLOR, 0, gray);
         glClearBufferfv(GL_DEPTH, 0, ones);
 
-		// setup binding correctly...
-		glActiveTexture(GL_TEXTURE0 + texunit_envmap);
-
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex_envmap);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, color_texture);
 
         glViewport(0, 0, info.windowWidth, info.windowHeight);
 
@@ -268,6 +176,11 @@ protected:
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		// ----------------------------------------------------------------------------------------------
+		// 2.nd render pass: render the content of the cubemap without the object that use the cubemap
+		// ----------------------------------------------------------------------------------------------
+		RenderCubeMapExt();
+
+		// ----------------------------------------------------------------------------------------------
 		// 3.rd render pass: render objects with the corresponding skybox applied to the corresponding object
 		// ----------------------------------------------------------------------------------------------
 
@@ -278,7 +191,11 @@ protected:
 
         glEnable(GL_DEPTH_TEST);
 
-        object.render();
+		for (auto it = m_Objects.begin(); it != m_Objects.end(); ++it)
+		{
+			sb7::object *pObject = *it;
+			pObject->render();
+		}
 
     }
 
@@ -359,6 +276,12 @@ protected:
                     envmap_index = (envmap_index + 1) % 3;
                     tex_envmap = envmaps[envmap_index];
                     break;
+				case 'S':
+					showBufferView = !showBufferView;
+					break;
+				case 'U':
+					updateBufferView = !updateBufferView;
+					break;
             }
         }
     }
@@ -374,6 +297,9 @@ protected:
     GLuint          tex_envmap;
     GLuint          envmaps[3];
     int             envmap_index;
+
+	bool showBufferView = false;
+	bool updateBufferView = false;
 
     struct
     {
@@ -395,7 +321,8 @@ protected:
     } uniforms;
 
     sb7::object     object;
-	
+	sb7::object     object2;
+
 	std::vector<sb7::object *> m_Objects;
 
     GLuint          skybox_vao;

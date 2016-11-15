@@ -56,6 +56,11 @@ namespace TotalGlobal
 
 		bool Render();
 
+		GLuint GetFramebufferIndex()
+		{
+			return m_Index_fbo;
+		}
+
 		GLuint GetTextureUnitIndex()
 		{
 			return m_Index_texUnit;
