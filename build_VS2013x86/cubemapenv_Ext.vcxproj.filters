@@ -9,6 +9,15 @@
       <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\cubemapenv_Ext\CubemapFramebuffer.cpp" />
+    <ClCompile Include="..\src\BufferView\BufferView.cpp">
+      <Filter>BufferView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\BufferView\FrameBufferObjectView.cpp">
+      <Filter>BufferView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\BufferView\TextureView.cpp">
+      <Filter>BufferView</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Superbible_7\sb7code-master\CMakeLists.txt" />
@@ -16,6 +25,9 @@
   <ItemGroup>
     <Filter Include="Helpers">
       <UniqueIdentifier>{ce624543-710a-4758-a078-bb60699c0efb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BufferView">
+      <UniqueIdentifier>{708e1b19-c11d-4d44-8d56-5ad408a70d07}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -26,5 +38,14 @@
       <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\cubemapenv_Ext\CubemapFramebuffer.h" />
+    <ClInclude Include="..\src\BufferView\BufferView.h">
+      <Filter>BufferView</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\BufferView\FrameBufferObjectView.h">
+      <Filter>BufferView</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\BufferView\TextureView.h">
+      <Filter>BufferView</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

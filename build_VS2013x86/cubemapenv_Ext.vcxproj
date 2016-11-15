@@ -85,7 +85,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Superbible_7\sb7code-master\include;C:\Superbible_7\sb7code-master\extern\glfw-3.0.4\include;C:\Superbible_7\sb7code-master\src\Helpers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Superbible_7\sb7code-master\include;C:\Superbible_7\sb7code-master\extern\glfw-3.0.4\include;C:\Superbible_7\sb7code-master\src\Helpers;C:\Superbible_7\sb7code-master\src\BufferView;C:\Superbible_7\sb7code-master\extern\opencv-2.4.12\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Debug/</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -115,8 +115,8 @@
     </Midl>
     <Link>
       <AdditionalOptions> /machine:X86 /debug %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\lib\sb7_d.lib;glfw3_d.lib;glu32.lib;opengl32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:/Superbible_7/sb7code-master/lib;C:/Superbible_7/sb7code-master/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\lib\sb7_d.lib;glfw3_d.lib;glu32.lib;opengl32.lib;opencv_calib3d2412d.lib;opencv_contrib2412d.lib;opencv_core2412d.lib;opencv_features2d2412d.lib;opencv_flann2412d.lib;opencv_gpu2412d.lib;opencv_highgui2412d.lib;opencv_imgproc2412d.lib;opencv_legacy2412d.lib;opencv_ml2412d.lib;opencv_objdetect2412d.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Superbible_7/sb7code-master/lib;C:/Superbible_7/sb7code-master/lib/$(Configuration);C:/Superbible_7/sb7code-master/extern/opencv-2.4.12/opencv/build/x86/vc12/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>C:/Superbible_7/sb7code-master/lib/cubemapenv_d.lib</ImportLibrary>
@@ -128,10 +128,14 @@
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
+    <PostBuildEvent>
+      <Command>rem xcopy  $(SolutionDir)..\dlls $(OutDir) /Y /I /R
+rem xcopy  C:\Superbible_7\sb7code-master\Dlls $(OutDir) /Y /I /R</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Superbible_7\sb7code-master\include;C:\Superbible_7\sb7code-master\extern\glfw-3.0.4\include;C:\Superbible_7\sb7code-master\src\Helpers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Superbible_7\sb7code-master\include;C:\Superbible_7\sb7code-master\extern\glfw-3.0.4\include;C:\Superbible_7\sb7code-master\src\Helpers;C:\Superbible_7\sb7code-master\src\BufferView;C:\Superbible_7\sb7code-master\extern\opencv-2.4.12\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Release/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -161,8 +165,8 @@
     </Midl>
     <Link>
       <AdditionalOptions> /machine:X86 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\lib\sb7.lib;glfw3.lib;glu32.lib;opengl32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:/Superbible_7/sb7code-master/lib;C:/Superbible_7/sb7code-master/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\lib\sb7.lib;glfw3.lib;glu32.lib;opengl32.lib;opencv_calib3d2412.lib;opencv_contrib2412.lib;opencv_core2412.lib;opencv_features2d2412.lib;opencv_flann2412.lib;opencv_gpu2412.lib;opencv_highgui2412.lib;opencv_imgproc2412.lib;opencv_legacy2412.lib;opencv_ml2412.lib;opencv_objdetect2412.lib;opencv_ts2412.lib;opencv_video2412.lib;opencv_nonfree2412.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Superbible_7/sb7code-master/lib;C:/Superbible_7/sb7code-master/lib/$(Configuration);C:/Superbible_7/sb7code-master/extern/opencv-2.4.12/opencv/build/x86/vc12/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>C:/Superbible_7/sb7code-master/lib/cubemapenv.lib</ImportLibrary>
@@ -174,6 +178,10 @@
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
+    <PostBuildEvent>
+      <Command>rem xcopy  $(SolutionDir)..\dlls $(OutDir) /Y /I /R
+rem xcopy  C:\Superbible_7\sb7code-master\Dlls $(OutDir) /Y /I /R</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
     <ClCompile>
@@ -323,6 +331,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\BufferView\BufferView.cpp" />
+    <ClCompile Include="..\src\BufferView\FrameBufferObjectView.cpp" />
+    <ClCompile Include="..\src\BufferView\TextureView.cpp" />
     <ClCompile Include="..\src\cubemapenv_Ext\CubemapFramebuffer.cpp" />
     <ClCompile Include="..\src\Helpers\FileHelpers.cpp" />
     <ClCompile Include="..\src\Helpers\StringHelpers.cpp" />
@@ -337,6 +348,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\BufferView\BufferView.h" />
+    <ClInclude Include="..\src\BufferView\FrameBufferObjectView.h" />
+    <ClInclude Include="..\src\BufferView\TextureView.h" />
     <ClInclude Include="..\src\cubemapenv_Ext\CubemapFramebuffer.h" />
     <ClInclude Include="..\src\Helpers\FileHelpers.hpp" />
     <ClInclude Include="..\src\Helpers\StringHelpers.hpp" />

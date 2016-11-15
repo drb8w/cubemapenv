@@ -21,5 +21,5 @@ void main(void)
     vec3 r = reflect(fs_in.view, normalize(fs_in.normal));
 
     // Sample from scaled using reflection vector
-	color = texture(tex_cubemap, r) *vec4(0.95, 0.80, 0.45, 1.0);
+	color = texture(tex_cubemap, r) *vec4(0.95, 0.80, 0.45, 1.0) + vec4(0.2, 0.2, 0.2, 1.0); // to see object if texture is black
 }
