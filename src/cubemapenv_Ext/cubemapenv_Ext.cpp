@@ -30,8 +30,11 @@
 
 //#include "StringHelpers.hpp"
 #include "CubemapFramebuffer.h"
+#include "TextureBoxFramebuffer.h"
 #include "FrameBufferObjectView.h"
 #include "TextureView.h"
+
+#define USE_TEX_BOX
 
 class cubemapenv_app : public sb7::application
 {
@@ -41,7 +44,11 @@ private:
 	GLsizei height = 512;
 
 	// -----------------------------------------
+#ifdef USE_TEX_BOX
+	TotalGlobal::TextureBoxFramebuffer *m_pTextureBoxFrameBuffer;
+#else
 	TotalGlobal::CubemapFramebuffer *m_pCubemapFrameBuffer;
+#endif
 
 	TextureView *pTexView;
 	FrameBufferObjectView *pFBOView;
@@ -65,15 +72,36 @@ protected:
 
 	void SetupCubeMapExt()
 	{
+#ifdef USE_TEX_BOX
+		m_pTextureBoxFrameBuffer = new TotalGlobal::TextureBoxFramebuffer(cubemap_render_prog, m_Objects, width, height);
+		pFBOView = new FrameBufferObjectView(width, height, "TextureBoxFramebuffer", Channels::RGB,
+			m_pTextureBoxFrameBuffer->GetFramebufferIndex(), m_pTextureBoxFrameBuffer->GetTextureUnitIndex(), m_pTextureBoxFrameBuffer->GetTextureBoxColorTextureIndex(),
+			GL_TEXTURE_2D);
+#else
 		m_pCubemapFrameBuffer = new TotalGlobal::CubemapFramebuffer(cubemap_render_prog, m_Objects, width, height);
-
-		pFBOView = new FrameBufferObjectView(width, height, "CubemapFramebuffer", Channels::RGB, 
-			m_pCubemapFrameBuffer->GetFramebufferIndex(), m_pCubemapFrameBuffer->GetTextureUnitIndex(), m_pCubemapFrameBuffer->GetCubeMapColorTextureIndex(), 
+		pFBOView = new FrameBufferObjectView(width, height, "CubemapFramebuffer", Channels::RGB,
+			m_pCubemapFrameBuffer->GetFramebufferIndex(), m_pCubemapFrameBuffer->GetTextureUnitIndex(), m_pCubemapFrameBuffer->GetCubeMapColorTextureIndex(),
 			GL_TEXTURE_CUBE_MAP);
+
+#endif
 	}
 
 	void RenderCubeMapExt()
 	{
+
+#ifdef USE_TEX_BOX
+		m_pTextureBoxFrameBuffer->Render();
+
+		tex_box = m_pTextureBoxFrameBuffer->GetTextureBoxColorTextureIndex();
+		texunit_box = m_pTextureBoxFrameBuffer->GetTextureUnitIndex();
+
+		// TODO: setup binding correctly... / bind later?
+		glActiveTexture(GL_TEXTURE0 + texunit_box);
+		glBindTexture(GL_TEXTURE_2D, tex_box);
+
+		////glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+#else
 		m_pCubemapFrameBuffer->Render();
 
 		tex_envmap = m_pCubemapFrameBuffer->GetCubeMapColorTextureIndex();
@@ -85,6 +113,7 @@ protected:
 
 		////glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
+#endif
 
 		pTexView->ShowBufferView(showBufferView);
 		pFBOView->ShowBufferView(showBufferView);
@@ -117,9 +146,8 @@ protected:
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 		// https://www.opengl.org/discussion_boards/showthread.php/181374-finding-out-the-active-texture-from-the-texture-unit
-		GLint whichID;
-		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &whichID);
-		pTexView = new TextureView(width, height, "mountaincube", Channels::RGB, whichID, tex_envmap, GL_TEXTURE_CUBE_MAP);
+		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &texunit_envmap);
+		pTexView = new TextureView(width, height, "mountaincube", Channels::RGB, texunit_envmap, tex_envmap, GL_TEXTURE_CUBE_MAP);
 
         object.load("media/objects/dragon.sbm");
 		//object.load("C:/Superbible_7/sb7code - master/bin/media/objects/dragon.sbm");
@@ -292,11 +320,14 @@ protected:
 	GLuint          cubemap_render_prog;
 
 	//CBR
-	GLuint			texunit_envmap;
+	GLint			texunit_envmap;
 
     GLuint          tex_envmap;
     GLuint          envmaps[3];
     int             envmap_index;
+
+	GLint			texunit_box;
+	GLuint          tex_box;
 
 	bool showBufferView = false;
 	bool updateBufferView = false;
