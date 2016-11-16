@@ -1,5 +1,9 @@
 #include "TextureBoxFramebuffer.h"
 
+//#define USE_DEPTH_BUFFER
+#define USE_DEFAULT_BUFFER_OBJECT
+#define USE_DEFUALT_MVC
+
 namespace TotalGlobal
 {
 
@@ -43,10 +47,13 @@ namespace TotalGlobal
 	{
 		// create a frame buffer object
 		// ----------------------------------------------------------------
+#ifdef USE_DEFAULT_BUFFER_OBJECT
+		m_Index_fbo = 0;
+#else
 		glGenFramebuffers(1, &m_Index_fbo);
 		// TODO: reuse this framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, m_Index_fbo); // bind generated framebuffer for writing, i.e. rendering
-
+#endif
 		// cretate the cubemap, i.e. the color texture for our frame buffer
 		// ----------------------------------------------------------------
 		// version 2.0 - multiple texture units
@@ -62,7 +69,7 @@ namespace TotalGlobal
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-
+#ifdef USE_DEPTH_BUFFER
 		// cretate the cubemap, i.e. the depth texture for our depth buffer
 		// ----------------------------------------------------------------
 		// version 2.0 - multiple texture units
@@ -71,18 +78,23 @@ namespace TotalGlobal
 		glBindTexture(GL_TEXTURE_2D, m_Index_depth_texture);
 
 		glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, m_Width, m_Height);
+#endif
 
 		// attach color and depth texture to the framebuffer
 		// ----------------------------------------------------------------
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_Index_color_texture, 0);
+#ifdef USE_DEPTH_BUFFER
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_Index_depth_texture, 0);
+#endif
 
 		// test framebuffer status
 		GLenum status_fbo = glCheckFramebufferStatus(m_Index_fbo); // GL_FRAMEBUFFER_COMPLETE = 0x8CD5 i.e. 36053
 		// GL_INVALID_ENUM is generated if target is not GL_FRAMEBUFFER.
 
 		// disable
+#ifndef USE_DEFAULT_BUFFER_OBJECT
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		return true;
@@ -111,14 +123,18 @@ namespace TotalGlobal
 	// bind the fbo, save our OpenGL state
 	bool TextureBoxFramebuffer::BeginRendering()
 	{
+#ifndef USE_DEFAULT_BUFFER_OBJECT
 		glBindFramebuffer(GL_FRAMEBUFFER, m_Index_fbo); // bind generated framebuffer for writing, i.e. rendering
 		static const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0 };
 		glDrawBuffers(1, draw_buffers);
 
 		glActiveTexture(GL_TEXTURE0 + m_Index_texUnit);
 		glBindTexture(GL_TEXTURE_2D, m_Index_color_texture);  // necessary  because of call to glFramebufferTexture2D later ???
+#ifdef USE_DEPTH_BUFFER
 		glBindTexture(GL_TEXTURE_2D, m_Index_depth_texture);   // necessary and correct to bind to the same texture unit ???
+#endif
 
+#endif
 		return true;
 	}
 	
@@ -130,10 +146,15 @@ namespace TotalGlobal
 		//// iterate over this variable six times, once for each face. See below
 		//int face = 0;
 
+#ifndef USE_DEFAULT_BUFFER_OBJECT
 		// attach new texture and renderbuffer to fbo
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_Index_color_texture, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_Index_depth_texture, 0); // ???
 
+#ifdef USE_DEPTH_BUFFER
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_Index_depth_texture, 0); // ???
+#endif
+
+#endif
 		//verifyStatus();
 
 		// clear
@@ -197,15 +218,33 @@ namespace TotalGlobal
 		static const GLfloat gray[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 		static const GLfloat ones[] = { 1.0f };
 		glClearBufferfv(GL_COLOR, m_Index_fbo, gray);
+#ifdef USE_DEPTH_BUFFER
 		glClearBufferfv(GL_DEPTH, m_Index_fbo, ones);
+#endif
 		glViewport(0, 0, m_Width, m_Height);
 
 		glUseProgram(m_Index_cubemap_render_prog);
 
+#ifdef USE_DEFUALT_MVC
+		//const float t = (float)currentTime * 0.1f;
+		const float t = 0.0f;
+
+		proj_matrix = vmath::perspective(60.0f, (float)m_Width / (float)m_Height, 0.1f, 1000.0f);
+		view_matrix = vmath::lookat(vmath::vec3(15.0f * sinf(t), 0.0f, 15.0f * cosf(t)),
+			vmath::vec3(0.0f, 0.0f, 0.0f),
+			vmath::vec3(0.0f, 1.0f, 0.0f));
+		mv_matrix = view_matrix *
+			vmath::rotate(t, 1.0f, 0.0f, 0.0f) *
+			vmath::rotate(t * 130.1f, 0.0f, 1.0f, 0.0f) *
+			vmath::translate(0.0f, -4.0f, 0.0f);
+#endif
+
 		glUniformMatrix4fv(m_Index_mv_matrix, 1, GL_FALSE, mv_matrix);
 		glUniformMatrix4fv(m_Index_proj_matrix, 1, GL_FALSE, proj_matrix);
 
+#ifdef USE_DEPTH_BUFFER
 		glEnable(GL_DEPTH_TEST);
+#endif
 
 		for (auto iter = m_Objects.begin(); iter != m_Objects.end(); ++iter)
 		{
@@ -220,9 +259,10 @@ namespace TotalGlobal
 	// unbind fbo, return to backbuffer rendering, cubemap is now ready to use
 	bool TextureBoxFramebuffer::EndRendering()
 	{
+#ifndef USE_DEFAULT_BUFFER_OBJECT
 		glBindTexture(GL_TEXTURE_2D, 0); // unbind the cube map
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind the frame buffer
-
+#endif
 		return true;
 	}
 
