@@ -335,6 +335,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="..\src\BufferView\FrameBufferObjectView.cpp" />
     <ClCompile Include="..\src\BufferView\TextureView.cpp" />
     <ClCompile Include="..\src\cubemapenv_Ext\CubemapFramebuffer.cpp" />
+    <ClCompile Include="..\src\cubemapenv_ext\TextureBoxFramebuffer.cpp" />
     <ClCompile Include="..\src\Helpers\FileHelpers.cpp" />
     <ClCompile Include="..\src\Helpers\StringHelpers.cpp" />
     <ClCompile Include="C:\Superbible_7\sb7code-master\src\cubemapenv_ext\cubemapenv_Ext.cpp" />
@@ -352,6 +353,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="..\src\BufferView\FrameBufferObjectView.h" />
     <ClInclude Include="..\src\BufferView\TextureView.h" />
     <ClInclude Include="..\src\cubemapenv_Ext\CubemapFramebuffer.h" />
+    <ClInclude Include="..\src\cubemapenv_ext\TextureBoxFramebuffer.h" />
     <ClInclude Include="..\src\Helpers\FileHelpers.hpp" />
     <ClInclude Include="..\src\Helpers\StringHelpers.hpp" />
   </ItemGroup>
