@@ -1,45 +1,11 @@
 #include "TextureBoxFramebuffer.h"
 
-//#define USE_DEPTH_BUFFER
-#define USE_DEFAULT_BUFFER_OBJECT
-#define USE_DEFUALT_MVC
+#define USE_DEPTH_BUFFER
+//#define USE_DEFAULT_BUFFER_OBJECT
+//#define USE_DEFUALT_MVC
 
 namespace TotalGlobal
 {
-
-	//// http://www.mbroecker.com/project_dynamic_cubemaps.html
-	////create FBO - cubemaps
-	//bool TextureBoxFramebuffer::createFBOCubemap()
-	//{
-	//	// create the cubemap
-	//	glGenTextures(1, &cubemap);
-	//	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
-	//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP);
-	//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//	// set textures
-	//	for (int i = 0; i < 6; ++i)
-	//		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-	//	// create the fbo
-	//	glGenFramebuffers(1, &framebuffer);
-	//	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	//	// create the uniform depth buffer
-	//	glGenRenderbuffers(1, &depthbuffer);
-	//	glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
-	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-	//	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	//	// attach it
-	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, framebuffer);
-	//	// attach only the +X cubemap texture (for completeness)
-	//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, cubemap, 0);
-	//	//// this function just checks for framebuffer completeness and throws and exception if it’s not happy
-	//	//verifyStatus();
-	//	// disable
-	//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	//}
 
 	// http://www.mbroecker.com/project_dynamic_cubemaps.html
 	// OpenGL Superbible 7, Off-Screen rendering
@@ -104,6 +70,44 @@ namespace TotalGlobal
 	{
 		// bind the fbo, save our OpenGL state
 		BeginRendering();
+
+		// ----------------------------------------------------------------------------------------------
+		// 1.st render pass: render the cubemap itself into the skybox
+		// ----------------------------------------------------------------------------------------------
+
+		static const GLfloat gray[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+		static const GLfloat ones[] = { 1.0f };
+		//const float t = (float)currentTime * 0.1f;
+		const float t = 0.0f;
+
+		vmath::mat4 proj_matrix = vmath::perspective(60.0f, (float)m_Width / (float)m_Height, 0.1f, 1000.0f);
+		vmath::mat4 view_matrix = vmath::lookat(vmath::vec3(15.0f * sinf(t), 0.0f, 15.0f * cosf(t)),
+			vmath::vec3(0.0f, 0.0f, 0.0f),
+			vmath::vec3(0.0f, 1.0f, 0.0f));
+		vmath::mat4 mv_matrix = view_matrix *
+			vmath::rotate(t, 1.0f, 0.0f, 0.0f) *
+			vmath::rotate(t * 130.1f, 0.0f, 1.0f, 0.0f) *
+			vmath::translate(0.0f, -4.0f, 0.0f);
+
+		glClearBufferfv(GL_COLOR, 0, gray);
+		glClearBufferfv(GL_DEPTH, 0, ones);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_Index_tex_envmap);
+
+		glViewport(0, 0, m_Width, m_Height);
+
+		glUseProgram(m_Index_skybox_prog);
+		glBindVertexArray(m_Index_skybox_vao);
+
+		glUniformMatrix4fv(m_Index_skybox_view_matrix, 1, GL_FALSE, view_matrix);
+
+		glDisable(GL_DEPTH_TEST);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		// ----------------------------------------------------------------------------------------------
+		// 2.nd render pass: render the content of the cubemap without the object that use the cubemap
+		// ----------------------------------------------------------------------------------------------
 
 		// TEST
 		//for (int i = 0; i < 6; ++i)
@@ -216,8 +220,9 @@ namespace TotalGlobal
 		// ready to draw here
 		// -------------------------
 		static const GLfloat gray[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+		static const GLfloat blue[] = { 0.2f, 0.2f, 0.8f, 1.0f };
 		static const GLfloat ones[] = { 1.0f };
-		glClearBufferfv(GL_COLOR, m_Index_fbo, gray);
+		glClearBufferfv(GL_COLOR, m_Index_fbo, blue);
 #ifdef USE_DEPTH_BUFFER
 		glClearBufferfv(GL_DEPTH, m_Index_fbo, ones);
 #endif
@@ -239,8 +244,8 @@ namespace TotalGlobal
 			vmath::translate(0.0f, -4.0f, 0.0f);
 #endif
 
-		glUniformMatrix4fv(m_Index_mv_matrix, 1, GL_FALSE, mv_matrix);
-		glUniformMatrix4fv(m_Index_proj_matrix, 1, GL_FALSE, proj_matrix);
+		glUniformMatrix4fv(m_Index_cubemap_render_mv_matrix, 1, GL_FALSE, mv_matrix);
+		glUniformMatrix4fv(m_Index_cubemap_render_proj_matrix, 1, GL_FALSE, proj_matrix);
 
 #ifdef USE_DEPTH_BUFFER
 		glEnable(GL_DEPTH_TEST);

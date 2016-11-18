@@ -21,7 +21,7 @@
     <ClCompile Include="..\src\cubemapenv_Ext\cubemapenv_Ext.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Superbible_7\sb7code-master\CMakeLists.txt" />
+    <CustomBuild Include="C:\Superbible_7\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Helpers">
@@ -29,6 +29,9 @@
     </Filter>
     <Filter Include="BufferView">
       <UniqueIdentifier>{708e1b19-c11d-4d44-8d56-5ad408a70d07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{4892a2f0-831f-4c1e-9b9a-52ad58725a46}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -49,5 +52,31 @@
       <Filter>BufferView</Filter>
     </ClInclude>
     <ClInclude Include="..\src\cubemapenv_ext\TextureBoxFramebuffer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\cubemap_render.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\cubemap_render.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\render.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\render.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\render_ext.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\render_ext.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\skybox.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\skybox.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

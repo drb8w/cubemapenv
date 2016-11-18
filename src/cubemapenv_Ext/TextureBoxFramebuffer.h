@@ -16,8 +16,17 @@ namespace TotalGlobal
 	{
 	private:
 
+		// Input
+		GLuint m_Index_skybox_prog;
+		GLuint m_Index_texunit_envmap;
+		GLuint m_Index_tex_envmap;
+
 		GLuint m_Index_cubemap_render_prog;
 
+		GLsizei m_Width = 512;
+		GLsizei m_Height = 512;
+
+		// output
 		GLuint m_Index_fbo;
 
 		GLuint m_Index_color_texture;
@@ -26,23 +35,41 @@ namespace TotalGlobal
 		GLuint m_Index_texUnit = 2;
 		GLuint m_Index_sampler;
 
-		GLsizei m_Width = 512;
-		GLsizei m_Height = 512;
+		// intermediate
+
+		GLuint m_Index_skybox_vao;
 
 		vmath::vec3 m_RenderPosition = vmath::vec3(0.0f, 0.0f, 0.0f);
 
 		// uniforms
-		GLint m_Index_mv_matrix;
-		GLint m_Index_proj_matrix;
+		GLint  m_Index_skybox_view_matrix;
+		
+		GLint m_Index_cubemap_render_mv_matrix;
+		GLint m_Index_cubemap_render_proj_matrix;
 
 		// object list
 		std::vector<sb7::object *> m_Objects;
 
 	public:
-		TextureBoxFramebuffer(GLuint index_cubemap_render_prog, const std::vector<sb7::object *> &objects, GLsizei width = 512, GLsizei height = 512)
-			: m_Index_cubemap_render_prog(index_cubemap_render_prog), m_Objects(objects), m_Width(width), m_Height(height)
+		TextureBoxFramebuffer(GLuint index_skybox_prog,
+			GLint index_texunit_envmap,
+			GLuint index_tex_envmap,
+			GLuint index_cubemap_render_prog,
+			const std::vector<sb7::object *> &objects, GLsizei width = 512, GLsizei height = 512)
+			: m_Index_skybox_prog(index_skybox_prog),
+			m_Index_texunit_envmap(index_texunit_envmap),
+			m_Index_tex_envmap(index_tex_envmap),
+			m_Index_cubemap_render_prog(index_cubemap_render_prog),
+			m_Objects(objects), m_Width(width), m_Height(height)
 		{
 			CreateFBOCubemap();
+
+			glGenVertexArrays(1, &m_Index_skybox_vao);
+			glBindVertexArray(m_Index_skybox_vao);
+
+			m_Index_skybox_view_matrix = glGetUniformLocation(index_skybox_prog, "view_matrix");
+			m_Index_cubemap_render_mv_matrix = glGetUniformLocation(index_cubemap_render_prog, "mv_matrix");
+			m_Index_cubemap_render_proj_matrix = glGetUniformLocation(index_cubemap_render_prog, "proj_matrix");
 		}
 
 		bool Render();

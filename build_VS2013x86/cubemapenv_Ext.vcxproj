@@ -357,6 +357,16 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="..\src\Helpers\FileHelpers.hpp" />
     <ClInclude Include="..\src\Helpers\StringHelpers.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\cubemap_render.fs.glsl" />
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\cubemap_render.vs.glsl" />
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\render.fs.glsl" />
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\render.vs.glsl" />
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\render_ext.fs.glsl" />
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\render_ext.vs.glsl" />
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\skybox.fs.glsl" />
+    <None Include="..\bin\media\shaders\cubemapenv_Ext\skybox.vs.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

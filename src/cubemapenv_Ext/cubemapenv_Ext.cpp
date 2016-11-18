@@ -34,7 +34,7 @@
 #include "FrameBufferObjectView.h"
 #include "TextureView.h"
 
-#define USE_TEX_BOX
+//#define USE_TEX_BOX
 
 class cubemapenv_app : public sb7::application
 {
@@ -73,17 +73,21 @@ protected:
 	void SetupCubeMapExt()
 	{
 #ifdef USE_TEX_BOX
-		m_pTextureBoxFrameBuffer = new TotalGlobal::TextureBoxFramebuffer(cubemap_render_prog, m_Objects, width, height);
+		m_pTextureBoxFrameBuffer = new TotalGlobal::TextureBoxFramebuffer(
+			skybox_prog, texunit_envmap, tex_envmap,
+			cubemap_render_prog, m_Objects, width, height);
 		pFBOView = new FrameBufferObjectView(width, height, "TextureBoxFramebuffer", Channels::RGB,
 			m_pTextureBoxFrameBuffer->GetFramebufferIndex(), m_pTextureBoxFrameBuffer->GetTextureUnitIndex(), m_pTextureBoxFrameBuffer->GetTextureBoxColorTextureIndex(),
 			GL_TEXTURE_2D);
 #else
-		m_pCubemapFrameBuffer = new TotalGlobal::CubemapFramebuffer(cubemap_render_prog, m_Objects, width, height);
+		m_pCubemapFrameBuffer = new TotalGlobal::CubemapFramebuffer(
+			skybox_prog, texunit_envmap, tex_envmap,
+			cubemap_render_prog, m_Objects, width, height);
 		pFBOView = new FrameBufferObjectView(width, height, "CubemapFramebuffer", Channels::RGB,
 			m_pCubemapFrameBuffer->GetFramebufferIndex(), m_pCubemapFrameBuffer->GetTextureUnitIndex(), m_pCubemapFrameBuffer->GetCubeMapColorTextureIndex(),
 			GL_TEXTURE_CUBE_MAP);
-
 #endif
+
 	}
 
 	void RenderCubeMapExt()
