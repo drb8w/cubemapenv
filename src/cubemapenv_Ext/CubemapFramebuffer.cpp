@@ -116,13 +116,13 @@ namespace TotalGlobal
 		// ----------------------------------------------------------------------------------------------
 
 		// TEST
-		//for (int i = 0; i < 6; ++i)
-		//{
-		//	// attach the correct cube face, clear it and set up the matrices
-		//	// and draw the scene without certain objects
-		//	DrawToFace(i);
-		//}
-		DrawToFace(0);
+		for (int i = 0; i < 6; ++i)
+		{
+			// attach the correct cube face, clear it and set up the matrices
+			// and draw the scene without certain objects
+			DrawToFace(i);
+		}
+		//DrawToFace(0);
 
 		// unbind fbo, return to backbuffer rendering, cubemap is now ready to use
 		EndRendering();
